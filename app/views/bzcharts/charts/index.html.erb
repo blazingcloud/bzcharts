@@ -1,0 +1,15 @@
+
+<% %w{bar line pie}.each do |chart_type| %>
+  <a href="/charts/<%= "#{@chart_name}.#{chart_type}" %>"><%= chart_type %></a>
+<% end %>
+
+<div class="charts row">
+  <div class="ten columns centered">
+    <div id='chart' class='chart'>
+    </div>
+  </div>
+</div>
+
+<script type='text/javascript'>
+  window.bzcharts.render('#chart', '<%= @chart_name %>', '<%= @chart_type %>', 400, 400);
+</script>
