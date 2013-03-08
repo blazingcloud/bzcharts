@@ -16,28 +16,28 @@ BZChart.prototype = {
 
         function model()       { return self.model[xis]; }
         function values()      { return self.model.data.map('values').flatten(); }
-        function elf()         { return self[xis]; }
+        function zelf()         { return self[xis]; }
         function dateScale()   { return model().scale == 'date'; }
         function linearScale() { return model().scale == 'linear'; }
 
         self.axisFunctions[xis] = {
           value: function value(v) { return dateScale() ? self.date(v[xis]) : v[xis]; },
-          extent: function() { return d3.extent(values(), function(d) { return elf().value(d); }); },
+          extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }); },
           scale: function scale() {
-            if (!elf().d3scale) {
+            if (!zelf().d3scale) {
               if (dateScale()) {
-                elf().d3scale = d3.time.scale().domain(elf().extent());
+                zelf().d3scale = d3.time.scale().domain(zelf().extent());
               } else if (linearScale()) {
-                elf().d3scale = d3.scale.linear().domain(d3.extent(elf().extent()));
+                zelf().d3scale = d3.scale.linear().domain(d3.extent(zelf().extent()));
               } else {
-                elf().d3scale = d3.scale.ordinal();
+                zelf().d3scale = d3.scale.ordinal();
               }
             }
-            return elf().d3scale;
+            return zelf().d3scale;
           },
           newAxis: function() {
             var orient = model().orientation || (xis == 'x' ? 'bottom' : 'left'); //xxx come back to this
-            var axis = d3.svg.axis().scale(elf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
+            var axis = d3.svg.axis().scale(zelf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
             var format = model().format;
             if (dateScale()) {
               var formatter = d3.time.format(format ? format : "%Y-%m-%d");
@@ -48,10 +48,10 @@ BZChart.prototype = {
             return axis;
           },
           axis: function() {
-            if (!elf().d3axis) {
-              elf().d3axis = elf().newAxis();
+            if (!zelf().d3axis) {
+              zelf().d3axis = zelf().newAxis();
             }
-            return elf().d3axis;
+            return zelf().d3axis;
           }
         }
       }
