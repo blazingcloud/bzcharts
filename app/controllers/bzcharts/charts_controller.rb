@@ -9,7 +9,8 @@ module Bzcharts
     def data
       @chart_name = params[:chart_name] || 'Random'
 
-      chart = "Bzcharts::#{@chart_name.capitalize}Chart".constantize.new
+      mod, *chart = @chart_name.split(/:/)
+      chart = "#{mod.capitalize if mod}::#{chart.flat_map{|c|c.split(/[^a-z0-9]/i)}.map{|c|c.capitalize}.join}Chart".constantize.new
 
       render content_type:'text/json', text:chart.data.to_json
     end
