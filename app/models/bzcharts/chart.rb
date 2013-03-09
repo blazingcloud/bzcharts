@@ -17,7 +17,7 @@ module Bzcharts
       false
     end
 
-    def data
+    def data(params=nil)
       raise 'not implemented in abstact class'
     end
   end

@@ -1,7 +1,7 @@
 module Bzcharts
   class UsersChart < Chart
 
-    def data
+    def data(params=nil)
       color = COLORS.shuffle.first
       {
         x: {
