@@ -138,7 +138,7 @@ BZChart.prototype = {
 };
 
 window.bzcharts = {
-  render: function(selector, chart_name, chart_type, width, height) {
+  render: function(selector, width, height, chart_name, chart_type) {
     d3.json('/charts/data/' + chart_name + '.json', function(chart_data) {
       if (chart_type == 'pie') {
         return new BZPieChart(width, height).render(selector, chart_data);
