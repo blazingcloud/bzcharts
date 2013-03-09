@@ -41,7 +41,7 @@ BZChart.prototype = {
             var format = model().format;
             if (dateScale()) {
               var formatter = d3.time.format(format ? format : "%Y-%m-%d");
-              axis.ticks(d3.time.days, 1).tickFormat(function(d) { return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d); });
+              axis.ticks(d3.time.days, 1).tickFormat((format == 'none') ? '' : function(d) { return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d); });
             } else if (format) {
               axis.ticks(values().map(xis).unique().length).tickFormat((format == 'none') ? '' : d3.format(format));
             }
