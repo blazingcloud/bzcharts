@@ -1,7 +1,7 @@
 module Bzcharts
   class RandomChart < Chart
 
-    def data(params=nil)
+    def data(params={})
       {
         x: {
           label:'x axis',
