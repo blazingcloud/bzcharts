@@ -22,13 +22,13 @@ BZChart.prototype = {
 
         self.axisFunctions[xis] = {
           value: function value(v) { return dateScale() ? self.date(v[xis]) : v[xis]; },
-          extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }); },
+          extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }).sort(function(a,b){return a-b}); },
           scale: function scale() {
             if (!zelf().d3scale) {
               if (dateScale()) {
                 zelf().d3scale = d3.time.scale().domain(zelf().extent());
               } else if (linearScale()) {
-                zelf().d3scale = d3.scale.linear().domain(d3.extent(zelf().extent()));
+                zelf().d3scale = d3.scale.linear().domain(zelf().extent());
               } else {
                 zelf().d3scale = d3.scale.ordinal();
               }
@@ -40,8 +40,10 @@ BZChart.prototype = {
             var axis = d3.svg.axis().scale(zelf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
             var format = model().format;
             if (dateScale()) {
-              var formatter = d3.time.format(format && format != 'none' ? format : "%Y-%m-%d");
-              axis.ticks(d3.time.days, 1).tickFormat((format == 'none') ? '' : function(d) { return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d); });
+              var formatter = d3.time.format((format && format != 'none') ? format : "%Y-%m-%d");
+              axis.ticks(d3.time.days, 1).tickFormat((format == 'none') ? '' : function(d) {
+                return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d);
+              });
             } else if (format) {
               axis.ticks(values().map(xis).unique().length).tickFormat((format == 'none') ? '' : d3.format(format));
             }
