@@ -11,6 +11,7 @@ BZPieChart.prototype.build = function(selector) {
   self.model.data.each(function(data) {
 
     var svg = self.svg(selector)
+      .append('g')
       .attr("transform", "translate(" + self.width / 2 + "," + self.height / 2 + ")");
 
     pies.push(svg);
