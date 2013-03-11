@@ -35,17 +35,28 @@ BZChart.prototype = {
             }
             return zelf().d3scale;
           },
+          formatter: function() {
+            var format = model().format;
+            if (format == 'none') { return function(d) { return ''; } }
+            if (dateScale()) {
+              var formatter = d3.time.format(format ? format : "%Y-%m-%d");
+              return function(d) {
+                return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d);
+              };
+            } else if (linearScale()) {
+              return d3.format(format);
+            } else {
+              return function(d){ return d; }
+            }
+          },
           newAxis: function() {
             var orient = model().orientation || (xis == 'x' ? 'bottom' : 'left'); //xxx come back to this
             var axis = d3.svg.axis().scale(zelf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
             var format = model().format;
             if (dateScale()) {
-              var formatter = d3.time.format((format && format != 'none') ? format : "%Y-%m-%d");
-              axis.ticks(d3.time.days, 1).tickFormat((format == 'none') ? '' : function(d) {
-                return (typeof(d) == "string") ? formatter(new Date(Date.parse(d))) : formatter(d);
-              });
+              axis.ticks(d3.time.days, 1).tickFormat(zelf().formatter());
             } else if (format) {
-              axis.ticks(values().map(xis).unique().length).tickFormat((format == 'none') ? '' : d3.format(format));
+              axis.ticks(values().map(xis).unique().length).tickFormat(zelf().formatter());
             }
             return axis;
           },

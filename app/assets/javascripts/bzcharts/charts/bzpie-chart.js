@@ -32,16 +32,26 @@ BZPieChart.prototype.build = function(selector) {
       .attr("d", function(d) { return arc(d); })
       .attr("style", function(d, i) { return self.style(data.values[i].style); });
 
-    svg.append("g").attr("class", "arclabels")
+    var labels = svg.append("g").attr("class", "arclabels")
       .selectAll(".arc-label")
       .data(pie(data.values))
       .enter()
-      .append("text")
-      .attr('class', function(d, i) { return 'chart-component section-' + i + ' arc-label' })
+      .append("g");
+
+    labels.append('text')
+      .attr('class', function(d, i) { return 'chart-component section-' + i + ' arc-label x' })
       .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-      .attr("dy", ".35em")
+      .attr("dy", "-.35em")
       .style("text-anchor", "middle")
-      .text(function(d) { return d.data.x; });
+      .text(function(d) { return self.x.formatter()(d.data.x); });
+
+    labels.append('text')
+      .attr('class', function(d, i) { return 'chart-component section-' + i + ' arc-label y' })
+      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+      .attr("dy", ".60em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return self.y.formatter()(d.data.y); });
+
 
   });
 
