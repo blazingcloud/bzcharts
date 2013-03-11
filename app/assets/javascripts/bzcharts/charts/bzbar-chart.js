@@ -15,15 +15,14 @@ BZBarChart.prototype.build = function(selector) {
     bars[d.x].push(d);
   });
 
-  self.x.d3scale = d3.scale.ordinal().rangeRoundBands([0, self.width], .2);
-  self.x.scale().domain(groups);
+  self.x.d3scale = d3.scale.ordinal().domain(groups).rangeRoundBands([0, self.width], .2);
 
   self.y.d3scale = d3.scale.linear().range([self.height, 0]);
   self.y.scale().domain([0, d3.max(d3.values(bars).flatten().map('y'))]);
 
-  var xBands = d3.scale.ordinal();
-  xBands.domain(self.model.data.map(function(d, i) { return i; }));
-  xBands.rangeRoundBands([0, self.x.scale().rangeBand()], .1);
+  var xBands = d3.scale.ordinal()
+    .domain(self.model.data.map(function(d, i) { return i; }))
+    .rangeRoundBands([0, self.x.scale().rangeBand()], .1);
 
   var svg = self.svg(selector, self.model.y.grid);
 

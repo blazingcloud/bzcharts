@@ -6,9 +6,6 @@ BZLineChart.prototype = new BZChart();
 BZLineChart.prototype.build = function(selector) {
   var self = this;
 
-  self.x.scale().range([0, self.width]);
-  self.y.scale().range([self.height, 0]);
-
   var renderers = {
     line: d3.svg.line()
       .x(function(d)  { return self.x.scale()(self.x.value(d)); })

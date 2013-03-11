@@ -14,30 +14,50 @@ BZChart.prototype = {
     function bfunc(xis) {
       if (!self.axisFunctions[xis]) {
 
+        var defaults = {
+          x: {
+            range: [0, self.width],
+            orientation: 'bottom'
+          },
+          y: {
+            range: [self.height, 0],
+            orientation: 'left'
+          }
+        };
+
+        function zelf()        { return self[xis]; }
         function model()       { return self.model[xis]; }
         function values()      { return self.model.data.map('values').flatten(); }
-        function zelf()         { return self[xis]; }
+
         function dateScale()   { return model().scale == 'date'; }
         function linearScale() { return model().scale == 'linear'; }
 
+        function sorter(a, b) { return a - b; }
+
         self.axisFunctions[xis] = {
+          model: function() { return self.model[xis]; },
+          values: function() { return values().map(xis); },
+          minor: function() { return model().minor; },
           value: function value(v) { return dateScale() ? self.date(v[xis]) : v[xis]; },
-          extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }).sort(function(a,b){return a-b}); },
+          extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }).sort(sorter); },
           scale: function scale() {
             if (!zelf().d3scale) {
               if (dateScale()) {
-                zelf().d3scale = d3.time.scale().domain(zelf().extent());
+                zelf().d3scale = d3.time.scale().domain(zelf().extent()).range(defaults[xis].range);
               } else if (linearScale()) {
-                zelf().d3scale = d3.scale.linear().domain(zelf().extent());
+                zelf().d3scale = d3.scale.linear().domain(zelf().extent()).range(defaults[xis].range);
               } else {
-                zelf().d3scale = d3.scale.ordinal();
+                zelf().d3scale = d3.scale.ordinal()
+                  .domain(zelf().values().unique().sort(sorter))
+                  .rangePoints([0, self.width])
+                ;
               }
             }
             return zelf().d3scale;
           },
           formatter: function() {
             var format = model().format;
-            if (format == 'none') { return function(d) { return ''; } }
+            if (format == 'none') { return function() { return ''; } }
             if (dateScale()) {
               var formatter = d3.time.format(format ? format : "%Y-%m-%d");
               return function(d) {
@@ -46,17 +66,16 @@ BZChart.prototype = {
             } else if (linearScale()) {
               return d3.format(format);
             } else {
-              return function(d){ return d; }
+              return function(d) { return d; }
             }
           },
           newAxis: function() {
-            var orient = model().orientation || (xis == 'x' ? 'bottom' : 'left'); //xxx come back to this
+            var orient = model().orientation || defaults[xis].orientation;
             var axis = d3.svg.axis().scale(zelf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
-            var format = model().format;
             if (dateScale()) {
-              axis.ticks(d3.time.days, 1).tickFormat(zelf().formatter());
-            } else if (format) {
-              axis.ticks(values().map(xis).unique().length).tickFormat(zelf().formatter());
+              axis.ticks(d3.time[model().tickscale || 'days'], 1).tickFormat(zelf().formatter());
+            } else {
+              axis.ticks(zelf().values().unique().length).tickFormat(zelf().formatter());
             }
             return axis;
           },
@@ -99,13 +118,13 @@ BZChart.prototype = {
 
     if (horizontal) {
       grid.append("g").attr("class", "y gridline")
-        .call(self.y.newAxis().tickFormat("").tickSize(-self.width, 1));
+        .call(self.y.newAxis().tickFormat("").tickSubdivide(self.y.minor() || 0).tickSize(-self.width));
     }
 
     if (vertical) {
       grid.append("g").attr("class", "x gridline")
         .attr("transform", "translate(0," + self.height + ")")
-        .call(self.x.newAxis().tickFormat("").tickSize(-self.height, 1));
+        .call(self.x.newAxis().tickFormat("").tickSubdivide(self.x.minor() || 0).tickSize(-self.height));
     }
 
     return svg;
@@ -152,15 +171,20 @@ BZChart.prototype = {
 
 window.bzcharts = {
   render: function(selector, width, height, chart_name, chart_type) {
-    d3.json('/charts/data/' + chart_name + '.json', function(chart_data) {
-      if (chart_type == 'pie') {
-        return new BZPieChart(width, height).render(selector, chart_data);
-      } else if (chart_type == 'bar') {
-        return new BZBarChart(width, height).render(selector, chart_data);
-      } else {
-        return new BZLineChart(width, height).render(selector, chart_data);
-      }
+    var chart;
+    if (chart_type == 'pie') {
+      chart = new BZPieChart(width, height);
+    } else if (chart_type == 'bar') {
+      chart = new BZBarChart(width, height);
+    } else {
+      chart = new BZLineChart(width, height);
+    }
+
+    d3.json('/charts/data/' + chart_name + '.json' + window.location.search, function(chart_data) {
+      chart.render(selector, chart_data);
     });
+
+    return chart;
   }
 };
 
