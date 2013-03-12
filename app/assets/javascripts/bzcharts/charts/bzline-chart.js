@@ -24,16 +24,19 @@ BZLineChart.prototype.update = function(data) {
 
   var lines = self.chart
     .selectAll(".chart-component")
-    .data(data, function(d) { return Math.random(); });
+    .data(data, function(d) { return d.values.map(function(k,v) { return k + '=' + v; }).join(','); });
 
   lines.enter()
-    .append("path")
+    .append("path");
+
+  lines.exit()
+    .remove();
+
+  lines
     .attr("class", function(d) { return ['chart-component', 'data-' + (d.type || 'line'), d['class']].compact().join(' ') })
     .attr("d", function(d) { return self.renderers[d.type](d.values); })
     .attr("style", function(d) { return self.style(d.style, d.type == 'line' ? ['fill'] : null); });
 
-  lines.exit()
-    .remove();
 
 };
 

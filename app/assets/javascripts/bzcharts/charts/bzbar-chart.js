@@ -40,17 +40,25 @@ BZBarChart.prototype.update = function(data) {
     .selectAll(".chart-component-group")
     .data(groups, function(d) { return Math.random(); });
 
-  group.enter().append("g")
-    .attr("class", function(d) { return ['chart-component-group', 'bargroup', bars[d]['class']].compact().join(' '); } )
-    .attr("transform", function(d) { return "translate(" + self.x.scale()(d) + ", 0)"; });
+  group.enter()
+    .append("g");
 
   group.exit()
     .remove();
 
+  group.attr("class", function(d) { return ['chart-component-group', 'bargroup', bars[d]['class']].compact().join(' '); } )
+    .attr("transform", function(d) { return "translate(" + self.x.scale()(d) + ", 0)"; });
+
   var rect = group.selectAll(".chart-component")
     .data(function(d) { return bars[d]; }, function(d) { return Math.random(); });
 
-  rect.enter().append("rect")
+  rect.enter()
+    .append("rect");
+
+  rect.exit()
+    .remove();
+
+  rect
     .attr("class", function(d) { return ['chart-component', 'data-bar', d['class']].compact().join(' '); })
     .attr("width", xBands.rangeBand())
     .attr("x", function(d, i) { return xBands(i); })
@@ -58,8 +66,6 @@ BZBarChart.prototype.update = function(data) {
     .attr("height", function(d) { return self.options.height - self.y.scale()(d.y); })
     .attr("style", function(d) { return self.style(d.data.style); });
 
-  rect.exit()
-    .remove();
 
 };
 

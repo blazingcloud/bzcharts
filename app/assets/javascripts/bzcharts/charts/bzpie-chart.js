@@ -22,8 +22,9 @@ BZPieChart.prototype.update = function(data) {
 
     var section = svg.append("g").attr("class", 'chart-component-group datarcs')
       .selectAll(".data-arc")
-      .data(pie(dataset.values), function(d) { return Math.random(); })
-      .enter()
+      .data(pie(dataset.values), function(d) { return d.data.x + '=' + d.data.y; });
+
+    section.enter()
       .append("path")
       .attr("class", function(d, i) { return ['chart-component', 'section-' + i, 'data-arc', d.data['class']].compact().join(' '); })
       .attr("d", function(d) { return arc(d); })
@@ -31,8 +32,9 @@ BZPieChart.prototype.update = function(data) {
 
     var labels = svg.append("g").attr("class", "arclabels")
       .selectAll(".arc-label")
-      .data(pie(dataset.values))
-      .enter()
+      .data(pie(dataset.values));
+
+    labels.enter()
       .append("g");
 
     labels.append('text')
