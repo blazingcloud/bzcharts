@@ -3,20 +3,16 @@ var BZPieChart = function (width, height) {
 };
 BZPieChart.prototype = new BZChart();
 
-BZPieChart.prototype.build = function(selector) {
+BZPieChart.prototype.update = function(data) {
   var self = this;
 
-  var pies = [];
+  data.each(function(dataset) {
 
-  self.model.data.each(function(data) {
-
-    var svg = self.svg(selector)
+    var svg = self.frame
       .append('g')
-      .attr("transform", "translate(" + self.width / 2 + "," + self.height / 2 + ")");
+      .attr("transform", "translate(" + self.options.width / 2 + "," + self.options.height / 2 + ")");
 
-    pies.push(svg);
-
-    var radius = Math.min(self.width, self.height) / 2;
+    var radius = Math.min(self.options.width, self.options.height) / 2;
 
     var arc = d3.svg.arc().outerRadius(radius).innerRadius(0);
 
@@ -26,16 +22,16 @@ BZPieChart.prototype.build = function(selector) {
 
     var section = svg.append("g").attr("class", 'chart-component-group datarcs')
       .selectAll(".data-arc")
-      .data(pie(data.values))
+      .data(pie(dataset.values), function(d) { return Math.random(); })
       .enter()
       .append("path")
       .attr("class", function(d, i) { return ['chart-component', 'section-' + i, 'data-arc', d.data['class']].compact().join(' '); })
       .attr("d", function(d) { return arc(d); })
-      .attr("style", function(d, i) { return self.style(data.values[i].style); });
+      .attr("style", function(d, i) { return self.style(dataset.values[i].style); });
 
     var labels = svg.append("g").attr("class", "arclabels")
       .selectAll(".arc-label")
-      .data(pie(data.values))
+      .data(pie(dataset.values))
       .enter()
       .append("g");
 
@@ -56,6 +52,9 @@ BZPieChart.prototype.build = function(selector) {
 
   });
 
-  return pies;
+};
 
+BZPieChart.prototype.build = function() {
+  var self = this;
+  return self;
 };

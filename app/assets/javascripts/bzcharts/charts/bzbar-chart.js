@@ -3,49 +3,72 @@ var BZBarChart = function (width, height) {
 };
 BZBarChart.prototype = new BZChart();
 
-BZBarChart.prototype.build = function(selector) {
+BZBarChart.prototype.update = function(data) {
   var self = this;
 
-  var groups = self.model.data.map(function(d) { return d.values.map('x'); }).flatten().unique();
+  var groups = data.map(function(d) { return d.values.map('x'); }).flatten().unique();
   var bars = {};
-  self.model.data.map("values").flatten().map(function(d) {
-    if (!bars[d.x]) {
-      bars[d.x] = [];
-    }
-    bars[d.x].push(d);
+  data.map(function(d) {
+    d.values.each(function(v) {
+      if (!bars[v.x]) {
+        bars[v.x] = [];
+      }
+      bars[v.x].push({
+        x: v.x,
+        y: v.y,
+        data: d
+      });
+    });
   });
 
-  self.x.d3scale = d3.scale.ordinal().domain(groups).rangeRoundBands([0, self.width], .2);
+  self.x.d3scale = d3.scale.ordinal().domain(groups).rangeRoundBands([0, self.options.width], .2);
 
-  self.y.d3scale = d3.scale.linear().range([self.height, 0]);
+  self.y.d3scale = d3.scale.linear().range([self.options.height, 0]);
   self.y.scale().domain([0, d3.max(d3.values(bars).flatten().map('y'))]);
 
   var xBands = d3.scale.ordinal()
-    .domain(self.model.data.map(function(d, i) { return i; }))
+    .domain(data.map(function(d, i) { return i; }))
     .rangeRoundBands([0, self.x.scale().rangeBand()], .1);
 
-  var svg = self.svg(selector, self.model.y.grid);
+  self.x.d3axis = undefined;
+  self.y.d3axis = undefined;
 
-  var group = svg.append("g").attr("class", "databars")
-    .selectAll(".databars")
-    .data(groups)
-    .enter().append("g")
-    .attr("class", function(d) { return ['chart-component-group', 'bargroup', self.model.data[d]['class']].compact().join(' '); } )
+  self.frame.select('.y.axis').call(self.y.axis());
+  self.frame.select('.x.axis').call(self.x.axis());
+
+  var group = self.chart
+    .selectAll(".chart-component-group")
+    .data(groups, function(d) { return Math.random(); });
+
+  group.enter().append("g")
+    .attr("class", function(d) { return ['chart-component-group', 'bargroup', bars[d]['class']].compact().join(' '); } )
     .attr("transform", function(d) { return "translate(" + self.x.scale()(d) + ", 0)"; });
 
-  group.selectAll("rect")
-    .data(function(d) { return bars[d]; })
-    .enter().append("rect")
+  group.exit()
+    .remove();
+
+  var rect = group.selectAll(".chart-component")
+    .data(function(d) { return bars[d]; }, function(d) { return Math.random(); });
+
+  rect.enter().append("rect")
     .attr("class", function(d) { return ['chart-component', 'data-bar', d['class']].compact().join(' '); })
     .attr("width", xBands.rangeBand())
     .attr("x", function(d, i) { return xBands(i); })
     .attr("y", function(d) { return self.y.scale()(d.y); })
-    .attr("height", function(d) { return self.height - self.y.scale()(d.y); })
-    .attr("style", function(d) { return self.style(d.style); })
-  ;
+    .attr("height", function(d) { return self.options.height - self.y.scale()(d.y); })
+    .attr("style", function(d) { return self.style(d.data.style); });
 
-  self.axittach(svg);
+  rect.exit()
+    .remove();
 
-  return svg;
+};
 
+BZBarChart.prototype.build = function() {
+  var self = this;
+
+  self.chart = self.frame.append("g").attr("class", "databars");
+
+  self.axittach(self.frame);
+
+  return self;
 };

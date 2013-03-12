@@ -1,13 +1,16 @@
 function BZChart() {}
 
 BZChart.prototype = {
-  init: function(width, height) {
+  style: function(style, exclude) { var css = ""; for (var k in style) { if (!exclude || exclude.indexOf(k) < 0) { css += k + ':' + style[k] + ';' } } return css; },
+  date: d3.time.format("%Y-%m-%d").parse,
+
+  init: function(options) {
     var self = this;
 
-    self.width    = width;
-    self.height   = height;
-    self.margin   = { top: 10, bottom: 50, left: 40, right: 50 };
-    self.date     = d3.time.format("%Y-%m-%d").parse;
+    self.options = options;
+    if (!self.options.margin) {
+      self.options.margin = { top: 10, bottom: 50, left: 40, right: 50 };
+    }
 
     self.axisFunctions = {};
 
@@ -16,18 +19,18 @@ BZChart.prototype = {
 
         var defaults = {
           x: {
-            range: [0, self.width],
+            range: [0, self.options.width],
             orientation: 'bottom'
           },
           y: {
-            range: [self.height, 0],
+            range: [self.options.height, 0],
             orientation: 'left'
           }
         };
 
         function zelf()        { return self[xis]; }
-        function model()       { return self.model[xis]; }
-        function values()      { return self.model.data.map('values').flatten(); }
+        function model()       { return self.options[xis]; }
+        function values()      { return self.data.map('values').flatten(); }
 
         function dateScale()   { return model().scale == 'date'; }
         function linearScale() { return model().scale == 'linear'; }
@@ -35,21 +38,20 @@ BZChart.prototype = {
         function sorter(a, b) { return a - b; }
 
         self.axisFunctions[xis] = {
-          model: function() { return self.model[xis]; },
           values: function() { return values().map(xis); },
-          minor: function() { return model().minor; },
-          value: function value(v) { return dateScale() ? self.date(v[xis]) : v[xis]; },
+          value:  function value(v) { return dateScale() ? self.date(v[xis]) : v[xis]; },
           extent: function() { return d3.extent(values(), function(d) { return zelf().value(d); }).sort(sorter); },
-          scale: function scale() {
-            if (!zelf().d3scale) {
+          scale:  function scale(rescale) {
+            if (!zelf().d3scale || rescale) {
               if (dateScale()) {
                 zelf().d3scale = d3.time.scale().domain(zelf().extent()).range(defaults[xis].range);
               } else if (linearScale()) {
-                zelf().d3scale = d3.scale.linear().domain(zelf().extent()).range(defaults[xis].range);
+                var extent = zelf().extent();
+                zelf().d3scale = d3.scale.linear().domain([extent[0] * 0.75, extent[1] * 1.25]).range(defaults[xis].range);
               } else {
                 zelf().d3scale = d3.scale.ordinal()
                   .domain(zelf().values().unique().sort(sorter))
-                  .rangePoints([0, self.width])
+                  .rangePoints(defaults[xis].range)
                 ;
               }
             }
@@ -69,9 +71,9 @@ BZChart.prototype = {
               return function(d) { return d; }
             }
           },
-          newAxis: function() {
+          newAxis: function(rescale) {
             var orient = model().orientation || defaults[xis].orientation;
-            var axis = d3.svg.axis().scale(zelf().scale()).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
+            var axis = d3.svg.axis().scale(zelf().scale(rescale)).orient(orient).tickSize(model().ticks ? 5 : 0, 0);
             if (dateScale()) {
               axis.ticks(d3.time[model().tickscale || 'days'], 1).tickFormat(zelf().formatter());
             } else {
@@ -79,9 +81,9 @@ BZChart.prototype = {
             }
             return axis;
           },
-          axis: function() {
-            if (!zelf().d3axis) {
-              zelf().d3axis = zelf().newAxis();
+          axis: function(rescale) {
+            if (!zelf().d3axis || rescale) {
+              zelf().d3axis = zelf().newAxis(rescale);
             }
             return zelf().d3axis;
           }
@@ -95,36 +97,27 @@ BZChart.prototype = {
     self.y = bfunc('y');
   },
 
-  style: function(style, exclude) { var css = ""; for (var k in style) { if (!exclude || exclude.indexOf(k) < 0) { css += k + ':' + style[k] + ';' } } return css; },
-
-  render: function(selector, model) {
+  svg: function() {
     var self = this;
 
-    self.model = model;
-    self.build(selector);
-  },
-
-  svg: function(selector, horizontal, vertical) {
-    var self = this;
-
-    var svg = d3.select(selector)
+    var svg = d3.select(self.options.selector)
       .append("svg")
-      .attr("width", self.width + self.margin.left + self.margin.right)
-      .attr("height", self.height + self.margin.top + self.margin.bottom)
+      .attr("width", self.options.width + self.options.margin.left + self.options.margin.right)
+      .attr("height", self.options.height + self.options.margin.top + self.options.margin.bottom)
       .append("g")
-      .attr("transform", "translate(" + self.margin.left + "," + self.margin.top + ")");
+      .attr("transform", "translate(" + self.options.margin.left + "," + self.options.margin.top + ")");
 
     var grid = svg.append("g").attr("class", "gridlines");
 
-    if (horizontal) {
+    if (self.options.y.grid) {
       grid.append("g").attr("class", "y gridline")
-        .call(self.y.newAxis().tickFormat("").tickSubdivide(self.y.minor() || 0).tickSize(-self.width));
+        .call(self.y.newAxis().tickFormat("").tickSubdivide(self.options.y.minor || 0).tickSize(-self.options.width));
     }
 
-    if (vertical) {
+    if (self.options.x.grid) {
       grid.append("g").attr("class", "x gridline")
-        .attr("transform", "translate(0," + self.height + ")")
-        .call(self.x.newAxis().tickFormat("").tickSubdivide(self.x.minor() || 0).tickSize(-self.height));
+        .attr("transform", "translate(0," + self.options.height + ")")
+        .call(self.x.newAxis().tickFormat("").tickSubdivide(self.options.x.minor || 0).tickSize(-self.options.height));
     }
 
     return svg;
@@ -137,32 +130,47 @@ BZChart.prototype = {
 
     lines.append("g")
       .attr('class', 'x axis')
-      .attr("transform", "translate(0," + self.height + ")")
-      .attr('style', self.style(self.model.x.style))
+      .attr("transform", "translate(0," + self.options.height + ")")
+      .attr('style', "z-index:10;" + self.style(self.options.x.style))
       .call(self.x.axis());
 
-    if (self.model.x.label) {
+    if (self.options.x.label) {
       lines.append("text")
         .attr('class', 'axis-label')
         .attr("dy", "-0.5em")
-        .attr("transform", "translate(" + self.width + "," + self.height + ")")
-        .attr('style', "text-anchor:end;" + self.style(self.model.x.style))
-        .text(self.model.x.label);
+        .attr("transform", "translate(" + self.options.width + "," + self.options.height + ")")
+        .attr('style', "z-index:10;text-anchor:end;" + self.style(self.options.x.style))
+        .text(self.options.x.label);
     }
 
     lines.append("g")
       .attr("class", "y axis")
-      .attr('style', self.style(self.model.y.style))
+      .attr('style', "z-index:10;" + self.style(self.options.y.style))
       .call(self.y.axis());
 
-    if (self.model.y.label) {
+    if (self.options.y.label) {
       lines.append("text")
         .attr('class', 'axis-label')
         .attr("transform", "rotate(-90)")
         .attr("dy", "1em")
-        .attr('style', "text-anchor:end;" + self.style(self.model.y.style))
-        .text(self.model.y.label);
+        .attr('style', "z-index:10;text-anchor:end;" + self.style(self.options.y.style))
+        .text(self.options.y.label);
     }
+  },
+
+  render: function(data) {
+    var self = this;
+
+    self.data = self.data ? self.data.concat(data) : data;
+
+    if (!self.frame) {
+      self.frame = self.svg();
+      self.build();
+    }
+
+    self.update(self.data);
+
+    return self;
   },
 
   end:null
@@ -170,19 +178,22 @@ BZChart.prototype = {
 };
 
 window.bzcharts = {
-  render: function(selector, width, height, chart_name, chart_type) {
+  charts: {},
+  render: function(chartName, options) {
     var chart;
-    if (chart_type == 'pie') {
-      chart = new BZPieChart(width, height);
-    } else if (chart_type == 'bar') {
-      chart = new BZBarChart(width, height);
+    if (options.type == 'pie') {
+      chart = new BZPieChart(options);
+    } else if (options.type == 'bar') {
+      chart = new BZBarChart(options);
     } else {
-      chart = new BZLineChart(width, height);
+      chart = new BZLineChart(options);
     }
 
-    d3.json('/charts/data/' + chart_name + '.json' + window.location.search, function(chart_data) {
-      chart.render(selector, chart_data);
+    d3.json('/charts/data/' + chartName + '.json' + window.location.search, function(data) {
+      chart.render(data);
     });
+
+    window.bzcharts.charts[chartName] = chart;
 
     return chart;
   }
