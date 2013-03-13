@@ -1,5 +1,11 @@
 function BZChart() {}
 
+/*
+* use ID
+* ticks:[(days, weeks, minutes, true), 5]
+*
+* */
+
 BZChart.prototype = {
   style: function(style, exclude) { var css = ""; for (var k in style) { if (!exclude || exclude.indexOf(k) < 0) { css += k + ':' + style[k] + ';' } } return css; },
   date: d3.time.format("%Y-%m-%d").parse,
