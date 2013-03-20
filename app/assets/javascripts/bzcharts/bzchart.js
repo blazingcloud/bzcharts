@@ -10,6 +10,7 @@ BZChart.prototype = {
     self.streams = [];
 
     //TODO: merge these hashes xxx
+    //TODO: colors xxx
     self.layout(options || self.defaults);
 
     return self;
@@ -36,9 +37,7 @@ BZChart.prototype = {
     self.grid.x.rescale(values);
     self.grid.y.rescale(values);
 
-    //TODO: add graph lines xxx
-
-    var frame = d3.select(self.selector).select('svg.bzframe');
+    var frame = d3.select(self.selector).select('svg.chart-frame');
     frame.select('g.x.axis').call(self.x.axis);
     frame.select('g.y.axis').call(self.y.axis);
     frame.select('g.x.grid').call(self.grid.x.axis);
@@ -51,6 +50,9 @@ BZChart.prototype = {
     var self = this;
 
     self.selector = options.selector || '#bzchart';
+
+    d3.select(self.selector)
+      .classed('bzchart', true)
 
     self.layers = {};
     self.components = {};
@@ -79,15 +81,15 @@ BZChart.prototype = {
 
     self.layers.frame = d3.select(self.selector)
       .append('svg')
-      .attr('class', 'bzframe');
+      .attr('class', 'chart-frame');
 
     self.layers.chart = self.layers.frame
       .append('g')
-      .attr('class', 'bzchart');
+      .attr('class', 'chart-content');
 
     self.layers.grid = self.layers.chart
       .append('g')
-      .attr('class', 'bzgrid');
+      .attr('class', 'chart-grid');
 
     self.layers.grid
       .append('g')
@@ -99,7 +101,7 @@ BZChart.prototype = {
 
     self.layers.data = self.layers.chart
       .append('g')
-      .attr('class', 'bzdata');
+      .attr('class', 'chart-data');
 
     self.components.bars = self.layers.data
       .append('g')
@@ -119,7 +121,7 @@ BZChart.prototype = {
 
     self.layers.axis = self.layers.chart
       .append('g')
-      .attr('class', 'bzaxis');
+      .attr('class', 'chart-axes');
 
     var xaxis = self.layers.axis
       .append('g')
@@ -163,7 +165,7 @@ BZChart.prototype = {
     self.grid.y.range([self.frame.height, 0]);
     self.grid.y.axis.tickSize(-self.frame.width);
 
-    var frame = d3.select(self.selector).select('svg.bzframe');
+    var frame = d3.select(self.selector).select('svg.chart-frame');
 
     frame
       .attr('width', self.frame.width + self.frame.margin.left + self.frame.margin.right)
@@ -171,7 +173,7 @@ BZChart.prototype = {
     ;
 
     frame
-      .select('g.bzchart')
+      .select('g.chart-content')
       .attr('transform', 'translate(' + self.frame.margin.left + ',' + self.frame.margin.top + ')')
     ;
 

@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require sugar-1.3.9
 //= require d3.v3
+//= require colorbrewer
 //= require ./bzcharts/bzchart
 
 
