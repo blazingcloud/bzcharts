@@ -143,7 +143,6 @@ BZChart.prototype = {
         .append('text')
         .attr('class', 'axis-label')
         .attr('dy', '-0.5em')
-        .attr('style', 'z-index:10;text-anchor:end;')
         .text(options.x.label);
     }
 
@@ -157,7 +156,6 @@ BZChart.prototype = {
         .attr('class', 'axis-label')
         .attr('transform', 'rotate(-90)')
         .attr('dy', '1em')
-        .attr('style', 'z-index:10;text-anchor:end;')
         .text(options.y.label);
     }
 
@@ -206,8 +204,12 @@ BZChart.prototype = {
   renderlines: function(data) {
     var self = this;
     var line = d3.svg.line()
-      .x(function (d) { return self.x.d3scale(d.x); })
-      .y(function (d) { return self.y.d3scale(d.y); });
+      .x(function (d) {
+        return self.x.scale == 'date' ? self.x.d3scale(self.util.date(d.x)) : self.x.d3scale(d.x);
+      })
+      .y(function (d) {
+        return self.y.scale == 'date' ? self.y.d3scale(self.util.date(d.y)) : self.y.d3scale(d.y);
+      });
 
     var lines = self.components.lines
       .selectAll('.chart-component')
@@ -248,9 +250,13 @@ BZChart.prototype = {
     var self = this;
 
     var area = d3.svg.area()
-      .x(function(d)  { return self.x.d3scale(d.x); })
+      .x(function(d)  {
+        return self.x.scale == 'date' ? self.x.d3scale(self.util.date(d.x)) : self.x.d3scale(d.x);
+      })
       .y0(self.frame.height)
-      .y1(function(d) { return self.y.d3scale(d.y); });
+      .y1(function(d) {
+        return self.y.scale == 'date' ? self.y.d3scale(self.util.date(d.y)) : self.y.d3scale(d.y);
+      });
 
     var areas = self.components.areas
       .selectAll('.chart-component')
@@ -541,6 +547,7 @@ BZChart.prototype = {
       var random = Object.values(colorbrewer).map(function(o){ return Object.values(o); }).flatten().sample(domain.length)
       return d3.scale.ordinal().domain(domain).range(random);
     },
+    date: d3.time.format('%Y-%m-%d').parse,
 
     end: null
   },
@@ -615,7 +622,7 @@ BZAxis.prototype = {
     var values = data.map(self.key);
 
     if (self.scale == 'date') {
-      self.d3scale.domain(d3.extent(values,function (d) { return date(d); }).sort(sorter));
+      self.d3scale.domain(d3.extent(values, function (d) { return date(d); }).sort(sorter));
     } else if (self.scale == 'linear') {
       var extent = d3.extent(values);
       self.d3scale.domain(d3.extent([+extent[0] * 0.75, +extent[1] * 1.25]));

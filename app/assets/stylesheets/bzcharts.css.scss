@@ -98,6 +98,8 @@
               .arc-label {
                 fill: #FFFFFF;
                 text-shadow: rgba(37,37,37,0.9) 0 0 0.25em;
+                font-size: 20px;
+                text-anchor: middle;
               }
             }
           }
@@ -106,6 +108,11 @@
 
       .chart-axes {
         .axis {
+          .axis-label {
+            z-index:10;
+            text-anchor:end;
+          }
+
           text {
             fill: rgb(82,82,82);
             &.axis-label {
