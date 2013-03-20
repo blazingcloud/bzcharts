@@ -51,6 +51,17 @@ BZChart.prototype = {
 
     self.selector = options.selector || '#bzchart';
 
+    self.transitions = {
+      duration: 1500,
+      delays: {
+        areas: 100,
+        bars: 300,
+        lines: 400,
+        pies: 1000
+      },
+      ease: 'cubic-in-out'//'elastic'
+    };
+
     d3.select(self.selector)
       .classed('bzchart', true)
 
@@ -210,18 +221,26 @@ BZChart.prototype = {
       .enter()
       .append('path')
       .style('stroke', function(d) { return self.colors(d.ident); })
+      .attr('d', function (d) { return line(d.values.map(function(f) { return {x:f.x, y:self.y.d3scale.domain()[0]}; })); })
     ;
 
     lines
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
     lines
-      .attr('d', function (d) { return line(d.values); })
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.toString().parameterize());
       })
+      .transition()
+      .duration(self.transitions.duration)
+      .ease(self.transitions.ease)
+      .delay(self.transitions.delays.lines)
+      .attr('d', function (d) { return line(d.values); })
     ;
 
     return self;
@@ -246,18 +265,25 @@ BZChart.prototype = {
       .enter()
       .append('path')
       .style('fill', function(d) { return self.colors(d.ident); })
+      .attr('d', function (d) { return area(d.values.map(function(f) { return {x:f.x, y:self.y.d3scale.domain()[0]}; })); })
     ;
 
     areas
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
     areas
-      .attr('d', function (d) { return area(d.values); })
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.toString().parameterize());
       })
+      .transition()
+      .duration(self.transitions.duration)
+      .ease(self.transitions.ease)
+      .attr('d', function (d) { return area(d.values); })
     ;
 
     return self;
@@ -287,6 +313,9 @@ BZChart.prototype = {
 
     pies
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
@@ -327,6 +356,9 @@ BZChart.prototype = {
 
     sections
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
@@ -346,6 +378,9 @@ BZChart.prototype = {
 
     labels
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove();
 
     labels
@@ -371,7 +406,7 @@ BZChart.prototype = {
 
     var bands = d3.scale.ordinal()
       .domain(data.bar.map(function(d, i) { return i; }))
-      .rangeRoundBands([0, scale.rangeBand()], .1);
+      .rangeRoundBands([0, scale.rangeBand()], .15);
 
     var group = self.components.bars
       .selectAll('.chart-component-group')
@@ -384,6 +419,9 @@ BZChart.prototype = {
 
     group
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
@@ -414,24 +452,42 @@ BZChart.prototype = {
       .enter()
       .append('rect')
       .style('fill', function(d) { return self.colors(d.ident); })
+      .attr('x', function(d, i) { return bands(i); })
+      .attr('y', self.frame.height)
+      .attr('height', 0)
+      .attr('width', bands.rangeBand())
     ;
 
     bar
       .exit()
+      .transition()
+      .duration(self.transitions.duration)
+      .style('opacity', 0)
       .remove()
     ;
 
     bar
-      .attr('width', bands.rangeBand())
-      .attr('x', function(d, i) { return bands(i); })
-      .attr('y', function(d) { return self.y.d3scale(d.y); })
-      .attr('height', function(d) { return self.frame.height - self.y.d3scale(d.y); })
       .attr('class', function(d) {
         return self.util.classes('chart-component', 'data-bar',
           'group-' + groups.indexOf(d.group),
           'bar-' + streams.indexOf(d.stream),
           'ident-' + d.ident.toString().parameterize()
         ); })
+
+      .transition()
+      .duration(self.transitions.delays.bars)
+      .ease(self.transitions.ease)
+      .attr('x', function(d, i) { return bands(i); })
+      .attr('width', bands.rangeBand())
+
+      .transition()
+      .duration(self.transitions.duration)
+      .ease(self.transitions.ease)
+      .delay(self.transitions.delays.bars)
+      .attr('x', function(d, i) { return bands(i); })
+      .attr('y', function(d) { return self.y.d3scale(d.y); })
+      .attr('width', bands.rangeBand())
+      .attr('height', function(d) { return self.frame.height - self.y.d3scale(d.y); })
     ;
 
     return self;
@@ -447,7 +503,7 @@ BZChart.prototype = {
       .renderareas(data)
       .renderpies(data)
       .renderbars(data)
-      ;
+    ;
   },
 
   width: function (width) {
