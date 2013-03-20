@@ -9,9 +9,7 @@ BZChart.prototype = {
 
     self.streams = [];
 
-    //TODO: merge these hashes xxx
-    //TODO: colors xxx
-    self.layout(options || self.defaults);
+    self.layout(options);
 
     return self;
   },
@@ -217,7 +215,7 @@ BZChart.prototype = {
     lines
       .attr('d', function (d) { return line(d.values); })
       .attr('class', function (d, i) {
-        return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.parameterize());
+        return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.toString().parameterize());
       })
     ;
 
@@ -250,7 +248,7 @@ BZChart.prototype = {
     areas
       .attr('d', function (d) { return area(d.values); })
       .attr('class', function (d, i) {
-        return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.parameterize());
+        return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.toString().parameterize());
       })
     ;
 
@@ -285,7 +283,7 @@ BZChart.prototype = {
     group
       .attr('transform', 'translate(' + self.frame.width / 2 + ',' + self.frame.height / 2 + ')')
       .attr('class', function(d, i) {
-        return self.util.classes('chart-component-group', 'datarcs', 'pie-' + i, 'ident-' + d.ident.parameterize())
+        return self.util.classes('chart-component-group', 'datarcs', 'pie-' + i, 'ident-' + d.ident.toString().parameterize())
       })
     ;
 
@@ -370,7 +368,7 @@ BZChart.prototype = {
     group
       .attr('transform', function(d) { return 'translate(' + scale(d) + ', 0)'; })
       .attr('class', function(d, i) {
-        return self.util.classes('chart-component-group', 'bargroup', 'group-' + i, 'group-ident-' + d.parameterize());
+        return self.util.classes('chart-component-group', 'bargroup', 'group-' + i, 'group-ident-' + d.toString().parameterize());
       })
     ;
 
@@ -382,7 +380,7 @@ BZChart.prototype = {
             return {
               ident: b.ident,
               group: d,
-              stream: b.ident.parameterize() || ('stream-' + i),
+              stream: b.ident.toString().parameterize() || ('stream-' + i),
               x: value.x,
               y: value.y
             };
@@ -409,7 +407,7 @@ BZChart.prototype = {
         return self.util.classes('chart-component', 'data-bar',
           'group-' + groups.indexOf(d.group),
           'bar-' + streams.indexOf(d.stream),
-          'ident-' + d.ident.parameterize()
+          'ident-' + d.ident.toString().parameterize()
         ); })
     ;
 
@@ -445,36 +443,12 @@ BZChart.prototype = {
 
   util: {
     classes: function() { return Object.values(arguments).compact().join(' '); },
+    colors: function(domain) {
+      var random = Object.values(colorbrewer).map(function(o){ return Object.values(o); }).flatten().sample(domain.length)
+      return d3.scale.ordinal().domain(domain).range(random);
+    },
 
     end: null
-  },
-
-  defaults: {
-
-    selector: '#bzchart',
-
-    layout: {
-      height: 300,
-      width: 300,
-      margin: { top: 10, bottom: 50, left: 40, right: 50 }
-    },
-
-    x: {
-      key: 'x',
-      orient: 'bottom',
-      scale: 'ordinal',
-//      format: 'none',
-      label: 'x axis'
-    },
-
-    y: {
-      key: 'y',
-      orient: 'left',
-      scale: 'linear',
-//      format: 'none',
-      label: 'y axis'
-    }
-
   },
 
   end: null

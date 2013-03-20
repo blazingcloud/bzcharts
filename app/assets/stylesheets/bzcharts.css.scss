@@ -21,38 +21,73 @@
       .chart-grid {
 
         .grid {
-          .major { }
-          .minor { }
-          .domain {}
+          text { display: none; };
+          .domain {
+            fill: none;
+            stroke: rgb(150,150,150);
+            stroke-width: 1;
+            shape-rendering:crispEdges;
 
-          line { }
-          text { }
+            display: none;
+          }
+          .major {
+            line {
+              stroke: rgb(199,199,199);
+              stroke-width: 1;
+              shape-rendering:crispEdges;
+            }
+          }
+          .minor {
+            stroke: rgb(230,230,230);
+            stroke-width: 1;
+            shape-rendering:crispEdges;
+          }
         }
-        .y.grid { }
       }
 
       .chart-data {
+
         .bars {
           .bargroup {
             .data-bar {
-
+              fill: rgb(158,154,200);
+              stroke: none;
+              opacity: 0.9;
             }
           }
         }
-        .areas {}
+        .areas {
+          .data-area {
+            fill: rgb(254,224,210);
+            stroke: darken(rgb(254,224,210), 10%);
+            stroke-width: 1;
+            opacity: 0.8;
+          }
+
+        }
         .lines {
           .data-line {
+            fill: none;
+            stroke: rgb(53,151,143);
+            stroke-width: 2;
+            opacity: 0.9;
           }
         }
         .pies {
           .datarcs {
+            opacity: 0.85;
+
             .sections {
               .data-arc {
+                fill: rgb(179,205,227);
+                stroke: rgb(255,255,255);
+                stroke-width: 2;
               }
             }
             .labels {
               .arc-label {
-
+                fill: rgb(55,126,184);
+                font-size: 20px;
               }
             }
           }
@@ -61,10 +96,15 @@
 
       .chart-axes {
         .axis {
-          .domain {}
-          .axis-label { }
-          .major { }
-          .minor { }
+          text {
+            fill: rgb(82,82,82);
+          }
+          .domain {
+            fill: none;
+            stroke: rgb(150,150,150);
+            stroke-width: 1;
+            shape-rendering:crispEdges;
+          }
         }
 
       }
