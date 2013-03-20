@@ -30,6 +30,8 @@ BZChart.prototype = {
 
     var values = Object.values(self.streams).map('values').flatten();
 
+    self.colors = self.util.colors([values.map('x'), values.map('y')].flatten().unique());
+
     self.x.rescale(values);
     self.y.rescale(values);
     self.grid.x.rescale(values);
@@ -217,6 +219,7 @@ BZChart.prototype = {
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.toString().parameterize());
       })
+      .style('stroke', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
@@ -250,6 +253,7 @@ BZChart.prototype = {
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.toString().parameterize());
       })
+      .style('fill', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
@@ -274,7 +278,8 @@ BZChart.prototype = {
 
     var group = pies
       .enter()
-      .append('g');
+      .append('g')
+    ;
 
     pies
       .exit()
@@ -285,6 +290,15 @@ BZChart.prototype = {
       .attr('class', function(d, i) {
         return self.util.classes('chart-component-group', 'datarcs', 'pie-' + i, 'ident-' + d.ident.toString().parameterize())
       })
+    ;
+
+    group
+      .append('circle')
+      .attr('class', 'shadow')
+      .attr('cx', self.frame.width / 2)
+      .attr('cy', self.frame.height / 2)
+      .attr('r', radius)
+      .attr('transform', 'translate(' + -self.frame.width / 2 + ',' + -self.frame.height / 2 + ')')
     ;
 
     group
@@ -310,7 +324,9 @@ BZChart.prototype = {
 
     sections
       .attr('class', function(d, i) { return self.util.classes('chart-component', 'data-arc', 'section-' + i); })
-      .attr('d', function(d) { return arc(d); });
+      .attr('d', function(d) { return arc(d); })
+      .style('fill', function(d) { return self.colors(d.data.x); })
+    ;
 
     var labels = pies
       .select('.labels')
@@ -329,7 +345,6 @@ BZChart.prototype = {
       .attr('class', function(d, i) { return self.util.classes('chart-component', 'arc-label', 'section-' + i); })
       .attr('transform', function(d) { return 'translate(' + arc.centroid(d) + ')'; })
       .attr('dy', '1em')
-      .style('text-anchor', 'middle')
       .text(function(d) { return d.data.x; });
 
     return self;
@@ -409,6 +424,7 @@ BZChart.prototype = {
           'bar-' + streams.indexOf(d.stream),
           'ident-' + d.ident.toString().parameterize()
         ); })
+      .style('fill', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
