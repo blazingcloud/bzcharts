@@ -194,6 +194,7 @@ BZChart.prototype = {
 
   renderlines: function(data) {
     var self = this;
+    if (!data.line) { return self; }
 
     var line = d3.svg.line()
       .x(function (d) { return self.x.d3scale(d.x); })
@@ -214,16 +215,18 @@ BZChart.prototype = {
       .remove();
 
     lines
-      .attr('class', function (d) { return self.util.classes('chart-component', 'data-line', 'ident-' + d.ident); })
       .attr('d', function (d) { return line(d.values); })
+      .attr('class', function (d, i) {
+        return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.parameterize());
+      })
     ;
 
     return self;
   },
 
   renderareas: function(data) {
-
     var self = this;
+    if (!data.area) { return self; }
 
     var area = d3.svg.area()
       .x(function(d)  { return self.x.d3scale(d.x); })
@@ -245,8 +248,10 @@ BZChart.prototype = {
       .remove();
 
     areas
-      .attr('class', function (d) { return self.util.classes('chart-component', 'data-area', 'ident-' + d.ident); })
       .attr('d', function (d) { return area(d.values); })
+      .attr('class', function (d, i) {
+        return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.parameterize());
+      })
     ;
 
     return self;
@@ -255,6 +260,7 @@ BZChart.prototype = {
 
   renderpies: function(data) {
     var self = this;
+    if (!data.pie) { return self; }
 
     var radius = Math.min(self.frame.width, self.frame.height) / 2;
     var arc = d3.svg.arc().outerRadius(radius).innerRadius(0);
@@ -277,8 +283,11 @@ BZChart.prototype = {
       .remove();
 
     group
-      .attr('class', function(d) { return self.util.classes('chart-component-group', 'datarcs', 'ident-' + d.ident) })
-      .attr('transform', 'translate(' + self.frame.width / 2 + ',' + self.frame.height / 2 + ')');
+      .attr('transform', 'translate(' + self.frame.width / 2 + ',' + self.frame.height / 2 + ')')
+      .attr('class', function(d, i) {
+        return self.util.classes('chart-component-group', 'datarcs', 'pie-' + i, 'ident-' + d.ident.parameterize())
+      })
+    ;
 
     group
       .append('g')
@@ -331,13 +340,10 @@ BZChart.prototype = {
 
   renderbars: function(data) {
     var self = this;
-
-    if (!data.bar) {
-      return self;
-    }
+    if (!data.bar) { return self; }
 
     var groups = data.bar.map(function(d) { return d.values.map('x'); }).flatten().unique();
-    var streams = data.bar.map(function(d,i) { return d.ident || ('stream-' + i) });
+    var streams = data.bar.map(function(d, i) { return d.ident || ('stream-' + i) });
 
     var scale = d3.scale.ordinal()
       .domain(groups)
@@ -362,8 +368,10 @@ BZChart.prototype = {
     ;
 
     group
-      .attr('class', function(d, i) { return self.util.classes('chart-component-group', 'bargroup', 'group-' + i); } )
       .attr('transform', function(d) { return 'translate(' + scale(d) + ', 0)'; })
+      .attr('class', function(d, i) {
+        return self.util.classes('chart-component-group', 'bargroup', 'group-' + i, 'group-ident-' + d.parameterize());
+      })
     ;
 
     var bar = group
@@ -374,7 +382,7 @@ BZChart.prototype = {
             return {
               ident: b.ident,
               group: d,
-              stream: b.ident || ('stream-' + i),
+              stream: b.ident.parameterize() || ('stream-' + i),
               x: value.x,
               y: value.y
             };
@@ -393,14 +401,17 @@ BZChart.prototype = {
     ;
 
     bar
-      .attr('class', function(d) {
-        return self.util.classes('chart-component', 'data-bar', 'group-' + groups.indexOf(d.group), 'bar-' + streams.indexOf(d.stream)); })
       .attr('width', bands.rangeBand())
       .attr('x', function(d, i) { return bands(i); })
       .attr('y', function(d) { return self.y.d3scale(d.y); })
       .attr('height', function(d) { return self.frame.height - self.y.d3scale(d.y); })
+      .attr('class', function(d) {
+        return self.util.classes('chart-component', 'data-bar',
+          'group-' + groups.indexOf(d.group),
+          'bar-' + streams.indexOf(d.stream),
+          'ident-' + d.ident.parameterize()
+        ); })
     ;
-
 
     return self;
   },

@@ -12,9 +12,62 @@
  *= require_self
  */
 
-.bzframe {
+.bzchart {
 
+  .chart-frame {
+
+    .chart-content {
+
+      .chart-grid {
+
+        .grid {
+          .major { }
+          .minor { }
+          .domain {}
+
+          line { }
+          text { }
+        }
+        .y.grid { }
+      }
+
+      .chart-data {
+        .bars {
+          .bargroup {
+            .data-bar {
+
+            }
+          }
+        }
+        .areas {}
+        .lines {
+          .data-line {
+          }
+        }
+        .pies {
+          .datarcs {
+            .sections {
+              .data-arc {
+              }
+            }
+            .labels {
+              .arc-label {
+
+              }
+            }
+          }
+        }
+      }
+
+      .chart-axes {
+        .axis {
+          .domain {}
+          .axis-label { }
+          .major { }
+          .minor { }
+        }
+
+      }
+    }
+  }
 }
-
-<svg class="bzframe" width="390" height="360"><g class="bzchart" transform="translate(40,10)"><g class="bzgrid"><g class="x grid" transform="translate(0,300)"><g class="tick major" style="opacity: 1;" transform="translate(0,0)"><line y2="-300" x2="0"></line><text y="3" x="0" dy=".71em" style="text-anchor: middle;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(300,0)"><line y2="-300" x2="0"></line><text y="3" x="0" dy=".71em" style="text-anchor: middle;"></text></g><path class="domain" d="M0,-300V0H300V-300"></path></g><g class="y grid"><g class="tick major" style="opacity: 1;" transform="translate(0,231.8181818181818)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(0,122.72727272727272)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(0,13.636363636363626)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(0,286.3636363636364)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(0,177.27272727272725)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><g class="tick major" style="opacity: 1;" transform="translate(0,68.18181818181819)"><line x2="300" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;"></text></g><path class="domain" d="M300,0H0V300H300"></path></g></g><g class="bzdata"><g class="bars"><g class="chart-component-group bargroup group-0" transform="translate(28, 0)"><rect class="chart-component data-bar group-0 bar-0" width="32" x="4" y="286.3636363636364" height="13.636363636363626"></rect><rect class="chart-component data-bar group-0 bar-1" width="32" x="39" y="231.8181818181818" height="68.18181818181819"></rect><rect class="chart-component data-bar group-0 bar-2" width="32" x="74" y="231.8181818181818" height="68.18181818181819"></rect></g><g class="chart-component-group bargroup group-1" transform="translate(164, 0)"><rect class="chart-component data-bar group-1 bar-0" width="32" x="4" y="68.18181818181819" height="231.8181818181818"></rect><rect class="chart-component data-bar group-1 bar-1" width="32" x="39" y="286.3636363636364" height="13.636363636363626"></rect><rect class="chart-component data-bar group-1 bar-2" width="32" x="74" y="286.3636363636364" height="13.636363636363626"></rect></g></g><g class="areas"></g><g class="lines"></g><g class="pies"></g></g><g class="bzaxis"><g class="x axis" transform="translate(0,300)"><text class="axis-label" dy="-0.5em" style="z-index:10;text-anchor:end;" transform="translate(300,0)">x axis</text><g class="tick major" style="opacity: 1;" transform="translate(0,0)"><line y2="0" x2="0"></line><text y="3" x="0" dy=".71em" style="text-anchor: middle;">a</text></g><g class="tick major" style="opacity: 1;" transform="translate(300,0)"><line y2="0" x2="0"></line><text y="3" x="0" dy=".71em" style="text-anchor: middle;">b</text></g><path class="domain" d="M0,0V0H300V0"></path></g><g class="y axis"><text class="axis-label" transform="rotate(-90)" dy="1em" style="z-index:10;text-anchor:end;">y axis</text><g class="tick major" style="opacity: 1;" transform="translate(0,231.8181818181818)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">2</text></g><g class="tick major" style="opacity: 1;" transform="translate(0,122.72727272727272)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">4</text></g><g class="tick major" style="opacity: 1;" transform="translate(0,13.636363636363626)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">6</text></g><g class="tick major" style="opacity: 1;" transform="translate(0,286.3636363636364)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">1</text></g><g class="tick major" style="opacity: 1;" transform="translate(0,177.27272727272725)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">3</text></g><g class="tick major" style="opacity: 1;" transform="translate(0,68.18181818181819)"><line x2="0" y2="0"></line><text x="-3" y="0" dy=".32em" style="text-anchor: end;">5</text></g><path class="domain" d="M0,0H0V300H0"></path></g></g></g></svg>
-
