@@ -14,7 +14,7 @@ var BZLineChart = function (options) {
   };
 };
 
-BZLineChart.prototype = new BZChart();
+BZLineChart.prototype = new oBZChart();
 
 BZLineChart.prototype.update = function(data) {
   var self = this;
@@ -36,7 +36,6 @@ BZLineChart.prototype.update = function(data) {
     .attr("class", function(d) { return ['chart-component', 'data-' + (d.type || 'line'), d['class']].compact().join(' ') })
     .attr("d", function(d) { return self.renderers[d.type](d.values); })
     .attr("style", function(d) { return self.style(d.style, d.type == 'line' ? ['fill'] : null); });
-
 
 };
 

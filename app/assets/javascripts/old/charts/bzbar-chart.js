@@ -1,7 +1,7 @@
 var BZBarChart = function (width, height) {
   this.init(width, height);
 };
-BZBarChart.prototype = new BZChart();
+BZBarChart.prototype = new oBZChart();
 
 BZBarChart.prototype.update = function(data) {
   var self = this;
@@ -65,7 +65,6 @@ BZBarChart.prototype.update = function(data) {
     .attr("y", function(d) { return self.y.scale()(d.y); })
     .attr("height", function(d) { return self.options.height - self.y.scale()(d.y); })
     .attr("style", function(d) { return self.style(d.data.style); });
-
 
 };
 

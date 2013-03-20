@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bzcharts (0.0.1)
+    bzcharts (0.0.3)
       rails (~> 3.2.11)
 
 GEM

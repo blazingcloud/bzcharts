@@ -1,7 +1,7 @@
 var BZPieChart = function (width, height) {
   this.init(width, height);
 };
-BZPieChart.prototype = new BZChart();
+BZPieChart.prototype = new oBZChart();
 
 BZPieChart.prototype.update = function(data) {
   var self = this;
