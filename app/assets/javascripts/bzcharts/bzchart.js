@@ -205,15 +205,13 @@ BZChart.prototype = {
 
   renderlines: function(data) {
     var self = this;
-    if (!data.line) { return self; }
-
     var line = d3.svg.line()
       .x(function (d) { return self.x.d3scale(d.x); })
       .y(function (d) { return self.y.d3scale(d.y); });
 
     var lines = self.components.lines
       .selectAll('.chart-component')
-      .data(data.line || [], function (d) {
+      .data(data, function (d) {
         return d.ident || d.values.map(function (k, v) { return k + ':' + v; }).join(',');
       });
 
@@ -248,7 +246,6 @@ BZChart.prototype = {
 
   renderareas: function(data) {
     var self = this;
-    if (!data.area) { return self; }
 
     var area = d3.svg.area()
       .x(function(d)  { return self.x.d3scale(d.x); })
@@ -257,7 +254,7 @@ BZChart.prototype = {
 
     var areas = self.components.areas
       .selectAll('.chart-component')
-      .data(data.area || [], function (d) {
+      .data(data, function (d) {
         return d.ident || d.values.map(function (k, v) { return k + ':' + v; }).join(',');
       });
 
@@ -292,7 +289,6 @@ BZChart.prototype = {
 
   renderpies: function(data) {
     var self = this;
-    if (!data.pie) { return self; }
 
     var radius = Math.min(self.frame.width, self.frame.height) / 2;
     var arc = d3.svg.arc().outerRadius(radius).innerRadius(0);
@@ -302,13 +298,14 @@ BZChart.prototype = {
 
     var pies = self.components.pies
       .selectAll('.chart-component-group')
-      .data(data.pie || [], function (d) {
+      .data(data, function (d) {
         return d.ident || d.values.map(function (k, v) { return k + ':' + v; }).join(',');
       });
 
     var group = pies
       .enter()
       .append('g')
+      .style('opacity', 0)
     ;
 
     pies
@@ -352,6 +349,7 @@ BZChart.prototype = {
       .enter()
       .append('path')
       .style('fill', function(d) { return self.colors(d.data.x); })
+      .attr('d', function(d) { return arc(d); })
     ;
 
     sections
@@ -364,30 +362,48 @@ BZChart.prototype = {
 
     sections
       .attr('class', function(d, i) { return self.util.classes('chart-component', 'data-arc', 'section-' + i); })
+      .transition()
+      .duration(self.transitions.duration)
       .attr('d', function(d) { return arc(d); })
     ;
 
     var labels = pies
       .select('.labels')
       .selectAll('.arc-label')
-      .data(function(d) { return pie(d.values) });
+      .data(function(d) { return pie(d.values) })
+    ;
 
     labels
       .enter()
-      .append('text');
+      .append('text')
+    ;
 
     labels
       .exit()
       .transition()
       .duration(self.transitions.duration)
       .style('opacity', 0)
-      .remove();
+      .remove()
+    ;
 
     labels
       .attr('class', function(d, i) { return self.util.classes('chart-component', 'arc-label', 'section-' + i); })
+      .transition()
+      .duration(self.transitions.duration)
+      .ease(self.transitions.ease)
       .attr('transform', function(d) { return 'translate(' + arc.centroid(d) + ')'; })
       .attr('dy', '1em')
-      .text(function(d) { return d.data.x; });
+      .text(function(d) { return d.data.x; })
+    ;
+
+    group
+      .transition()
+      .duration(self.transitions.duration)
+      .ease(self.transitions.ease)
+      .delay(self.transitions.delays.pies)
+      .style('opacity', 1)
+      .each('end', function() { d3.select(this).style('opacity', null); })
+    ;
 
     return self;
 
@@ -395,17 +411,16 @@ BZChart.prototype = {
 
   renderbars: function(data) {
     var self = this;
-    if (!data.bar) { return self; }
 
-    var groups = data.bar.map(function(d) { return d.values.map('x'); }).flatten().unique();
-    var streams = data.bar.map(function(d, i) { return d.ident || ('stream-' + i) });
+    var groups = data.map(function(d) { return d.values.map('x'); }).flatten().unique();
+    var streams = data.map(function(d, i) { return d.ident || ('stream-' + i) });
 
     var scale = d3.scale.ordinal()
       .domain(groups)
       .rangeRoundBands([0, self.frame.width], .2);
 
     var bands = d3.scale.ordinal()
-      .domain(data.bar.map(function(d, i) { return i; }))
+      .domain(data.map(function(d, i) { return i; }))
       .rangeRoundBands([0, scale.rangeBand()], .15);
 
     var group = self.components.bars
@@ -435,7 +450,7 @@ BZChart.prototype = {
     var bar = group
       .selectAll('.data-bar')
       .data(function(d) {
-        return data.bar.map(function(b){
+        return data.map(function(b){
             var value = b.values.filter(function(a){ return a.x == d }).first();
             return {
               ident: b.ident,
@@ -499,10 +514,10 @@ BZChart.prototype = {
     var data = self.streams.groupBy('type');
 
     return self
-      .renderlines(data)
-      .renderareas(data)
-      .renderpies(data)
-      .renderbars(data)
+      .renderareas((data.area || []))
+      .renderbars((data.bar || []))
+      .renderlines((data.line || []))
+      .renderpies((data.pie || []))
     ;
   },
 
