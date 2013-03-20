@@ -401,7 +401,7 @@ BZChart.prototype = {
       .duration(self.transitions.duration)
       .ease(self.transitions.ease)
       .delay(self.transitions.delays.pies)
-      .style('opacity', 1)
+      .style('opacity', 0.85)
       .each('end', function() { d3.select(this).style('opacity', null); })
     ;
 
