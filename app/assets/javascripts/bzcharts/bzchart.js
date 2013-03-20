@@ -103,13 +103,13 @@ BZChart.prototype = {
       .append('g')
       .attr('class', 'chart-data');
 
-    self.components.bars = self.layers.data
-      .append('g')
-      .attr('class', 'bars');
-
     self.components.areas = self.layers.data
       .append('g')
       .attr('class', 'areas');
+
+    self.components.bars = self.layers.data
+      .append('g')
+      .attr('class', 'bars');
 
     self.components.lines = self.layers.data
       .append('g')
@@ -208,18 +208,20 @@ BZChart.prototype = {
 
     lines
       .enter()
-      .append('path');
+      .append('path')
+      .style('stroke', function(d) { return self.colors(d.ident); })
+    ;
 
     lines
       .exit()
-      .remove();
+      .remove()
+    ;
 
     lines
       .attr('d', function (d) { return line(d.values); })
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-line', 'line-' + i, 'ident-' + d.ident.toString().parameterize());
       })
-      .style('stroke', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
@@ -242,18 +244,20 @@ BZChart.prototype = {
 
     areas
       .enter()
-      .append('path');
+      .append('path')
+      .style('fill', function(d) { return self.colors(d.ident); })
+    ;
 
     areas
       .exit()
-      .remove();
+      .remove()
+    ;
 
     areas
       .attr('d', function (d) { return area(d.values); })
       .attr('class', function (d, i) {
         return self.util.classes('chart-component', 'data-area', 'area-' + i, 'ident-' + d.ident.toString().parameterize());
       })
-      .style('fill', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
@@ -283,7 +287,8 @@ BZChart.prototype = {
 
     pies
       .exit()
-      .remove();
+      .remove()
+    ;
 
     group
       .attr('transform', 'translate(' + self.frame.width / 2 + ',' + self.frame.height / 2 + ')')
@@ -316,16 +321,18 @@ BZChart.prototype = {
 
     sections
       .enter()
-      .append('path');
+      .append('path')
+      .style('fill', function(d) { return self.colors(d.data.x); })
+    ;
 
     sections
       .exit()
-      .remove();
+      .remove()
+    ;
 
     sections
       .attr('class', function(d, i) { return self.util.classes('chart-component', 'data-arc', 'section-' + i); })
       .attr('d', function(d) { return arc(d); })
-      .style('fill', function(d) { return self.colors(d.data.x); })
     ;
 
     var labels = pies
@@ -406,6 +413,7 @@ BZChart.prototype = {
     bar
       .enter()
       .append('rect')
+      .style('fill', function(d) { return self.colors(d.ident); })
     ;
 
     bar
@@ -424,7 +432,6 @@ BZChart.prototype = {
           'bar-' + streams.indexOf(d.stream),
           'ident-' + d.ident.toString().parameterize()
         ); })
-      .style('fill', function(d) { return self.colors(d.ident); })
     ;
 
     return self;
