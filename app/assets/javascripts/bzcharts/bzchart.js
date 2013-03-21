@@ -51,7 +51,7 @@ BZChart.prototype = {
 
     self.selector = options.selector || '#bzchart';
 
-    self.transitions = {
+    self.transitions = options.transitions || {
       duration: 1500,
       delays: {
         areas: 100,
@@ -59,7 +59,7 @@ BZChart.prototype = {
         lines: 400,
         pies: 300
       },
-      ease: 'cubic-in-out'//'elastic'
+      ease: 'elastic' //'cubic-in-out'//
     };
 
     d3.select(self.selector)
