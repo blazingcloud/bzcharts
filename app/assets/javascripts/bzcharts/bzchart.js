@@ -314,6 +314,11 @@ BZChart.prototype = {
       .style('opacity', 0)
     ;
 
+    group
+      .append('circle')
+      .attr('class', 'shadow')
+    ;
+
     pies
       .exit()
       .transition()
@@ -322,16 +327,16 @@ BZChart.prototype = {
       .remove()
     ;
 
-    group
+    pies
       .attr('transform', 'translate(' + self.frame.width / 2 + ',' + self.frame.height / 2 + ')')
       .attr('class', function(d, i) {
         return self.util.classes('chart-component-group', 'datarcs', 'pie-' + i, 'ident-' + d.ident.toString().parameterize())
       })
     ;
 
-    group
-      .append('circle')
-      .attr('class', 'shadow')
+    pies.select('.shadow')
+      .transition()
+      .duration(self.transitions.duration)
       .attr('cx', self.frame.width / 2)
       .attr('cy', self.frame.height / 2)
       .attr('r', radius)
