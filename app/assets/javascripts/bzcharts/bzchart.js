@@ -59,11 +59,11 @@ BZChart.prototype = {
         lines: 400,
         pies: 300
       },
-      ease: 'elastic' //'cubic-in-out'//
+      ease: 'cubic-in-out'
     };
 
     d3.select(self.selector)
-      .classed('bzchart', true)
+      .classed('bzchart', true);
 
     self.layers = {};
     self.components = {};
@@ -625,15 +625,13 @@ BZAxis.prototype = {
     function sorter(a, b) { return a - b; }
     var date = d3.time.format('%Y-%m-%d').parse
 
-    var values = data.map(self.key);
-
     if (self.scale == 'date') {
-      self.d3scale.domain(d3.extent(values, function (d) { return date(d); }).sort(sorter));
+      self.d3scale.domain(d3.extent(data.map(self.key), function (d) { return date(d); }).sort(sorter));
     } else if (self.scale == 'linear') {
-      var extent = d3.extent(values);
-      self.d3scale.domain(d3.extent([+extent[0] * 0.75, +extent[1] * 1.25]));
+      var extent = d3.extent(data.map(function(d) { return +d[self.key] }));
+      self.d3scale.domain(d3.extent([extent[0] * 0.75, extent[1] * 1.25]));
     } else {
-      self.d3scale.domain(values.unique().sort(sorter))
+      self.d3scale.domain(data.map(self.key).unique().sort(sorter))
     }
 
     if (self.ticks == 'none') {
