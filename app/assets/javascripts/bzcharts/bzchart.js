@@ -57,7 +57,7 @@ BZChart.prototype = {
         areas: 100,
         bars: 300,
         lines: 400,
-        pies: 1000
+        pies: 300
       },
       ease: 'cubic-in-out'//'elastic'
     };
@@ -567,6 +567,7 @@ BZAxis.prototype = {
     self.key = options.key;
     self.scale = options.scale;
     self.ticks = options.ticks;
+    self.timescale = options.timescale;
 
     if (self.scale == 'date') {
       self.d3scale = d3.time.scale();
