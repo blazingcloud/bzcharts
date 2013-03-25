@@ -1,12 +1,21 @@
-function BZChart(options) {
-  return this.init(options);
+if (!window.bzcharts) { window.bzcharts = {}; }
+
+//TODO: have default options for missing options
+//TODO: refactor this huge hunk of code into smaller pieces
+//TODO: allow streams to have their own scales (if required)
+
+function BZChart(name, options) {
+  var self = this;
+  window.bzcharts[name] = self.init(name, options);
+  return self;
 }
 
 BZChart.prototype = {
 
-  init: function(options) {
+  init: function(name, options) {
     var self = this;
 
+    self.name = name;
     self.streams = [];
 
     self.layout(options);
@@ -14,17 +23,39 @@ BZChart.prototype = {
     return self;
   },
 
-  update: function (ident, type, stream) {
+  update: function (ident, type, stream, callback) {
     var self = this;
 
-    if (ident) {
-      self.streams.remove(function(d) { return d.ident == ident });
-      if (type && stream) {
+    if (typeof(stream) == 'string') {
+      d3.json(stream, function(data) {
+        var updated = self.update(ident, type, data);
+        if (callback) {
+          updated = callback.call(updated, ident, type, stream)
+        }
+        return updated;
+      });
+    } else {
+      if (ident && type && stream) {
+        self.streams.remove(function(d) { return d.ident == ident });
         self.streams.add({
           ident: ident,
           type: type,
           values: stream
         });
+      } else if (ident && type) {
+        self.streams.each(function(s) {
+          if (s.ident == ident) {
+            s.type = type;
+          }
+        });
+      } else if (ident && stream) {
+        self.streams.each(function(s) {
+          if (s.ident == ident) {
+            s.values = stream;
+          }
+        });
+      } else if (ident) {
+        self.streams.remove(function(d) { return d.ident == ident });
       }
     }
 
@@ -354,7 +385,8 @@ BZChart.prototype = {
     var sections = pies
       .select('.sections')
       .selectAll('.data-arc')
-      .data(function(d) { return pie(d.values) });
+      .data(function(d) { return pie(d.values) })
+    ;
 
     sections
       .enter()

@@ -1,17 +1,16 @@
 
-<% %w{bar line pie}.each do |chart_type| %>
-  <a href="/charts/<%= "#{@chart_name}.#{chart_type}" %>"><%= chart_type %></a>
-<% end %>
-
-<div class="charts row">
-  <div class="ten columns centered">
-    <div id='chart' class='chart'>
-    </div>
-  </div>
+<div id='bzchart'>
 </div>
 
 <script type='text/javascript'>
-  window.bzcharts.render('#chart', 400, 400, 'bzcharts:<%= @chart_name %>', '<%= @chart_type %>');
+
+  var chart = new BZChart('bzchart');
+
+  for (var i = 0;i<10;i++) {
+      chart.update('random' + i, ['line', 'bar', 'area'].sample(1), '/charts/bzcharts:random.json')
+  }
+  //  chart.update('users', ['line', 'bar', 'area', 'pie'].sample(1), '/charts/bzcharts:users.json');
+
 </script>
 
 
